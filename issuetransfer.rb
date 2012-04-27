@@ -9,7 +9,6 @@ require 'json'
 
 class GitHub
 	include HTTParty
-	base_uri 'http://github.com/api/v2/json'
 	
 	def initialize
 		puts 'Tracker URL to be imported (example: http://gforge.unl.edu/gf/project/unl_mediayak/tracker/ ):'
@@ -18,6 +17,15 @@ class GitHub
 		@project = STDIN.gets.chomp
 		puts 'Which user owns this project?'
 		@pushToUser = STDIN.gets.chomp
+		puts 'If using github:enterprise, what is your server (no trailing slash; press enter if not)?'
+		githubUri = STDIN.gets.chomp
+		if (githubUri == '')
+			githubUri = 'http://github.com'
+			@gistUri = 'http://gist.github.com'
+		else
+			@gistUri = githubUri + '/gist'
+		end
+		self.class.base_uri(githubUri + '/api/v2/json');
 		File.open('credentials.config', 'r') do |config|  
 		  @login = config.gets.chomp
 		  @token = config.gets.chomp
@@ -157,14 +165,14 @@ class GitHub
 	end
 
 	def createGist(name, content)
-		response = Net::HTTP.post_form(URI.parse('http://gist.github.com/api/v1/json/new'), {
+		response = Net::HTTP.post_form(URI.parse(@gistUri + '/api/v1/json/new'), {
 		      "files[#{name}]" => content,
 		      "description" => '',
 		      "login" => @login,
 		      "token" => @token
 		})
 		response = JSON.parse(response.body)
-		gist = 'https://gist.github.com/' + response['gists'][0]['repo']
+		gist = @gistUri + '/' + response['gists'][0]['repo']
 		sleep 1
 		return gist
 	end
