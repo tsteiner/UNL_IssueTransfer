@@ -77,6 +77,8 @@ class GitHub
 						dataTable = page3.css('table')[1].to_s
 						status = dataTable.match(/<strong>Status<\/strong>:<br\s*[\/]*>\s*(.*)\s*<\/td>/).to_s.gsub(/<\/?[^>]+>/, '').chomp.strip.gsub(/Status:/, '') || ''
 						title = dataTable.match(/<strong>Summary<\/strong><br\s*[\/]*>\s*(.*)\s*<\/tr>/).to_s.gsub(/<\/?[^>]+>/, '').gsub(/Summary/, '').chomp.strip || ''
+						trackerItemId = page3.css('input[name=tracker_item_id]')[0].attribute('value').to_s.chomp || ''
+						title = '[#' + trackerItemId + '] ' + title
 						body = page3.at_css('#details_readonly pre').to_s.gsub(/<\/?[^>]+>/, '') || ''
 						
 						case tag
